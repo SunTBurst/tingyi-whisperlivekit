@@ -1,6 +1,6 @@
 # 听译 · WhisperLiveKit 中文会议桌面
 
-[源码仓库](https://github.com/SunTBurst/tingyi-whisperlivekit) · [安装说明](docs/INSTALL.md) · [已知问题](docs/KNOWN_ISSUES.md) · [第三方许可](THIRD_PARTY_NOTICES.md)
+[源码仓库](https://github.com/SunTBurst/tingyi-whisperlivekit) · [图文博客](https://suntburst-blog.onrender.com/posts/tingyi-whisperlivekit-desktop/) · [安装说明](docs/INSTALL.md) · [已知问题](docs/KNOWN_ISSUES.md) · [第三方许可](THIRD_PARTY_NOTICES.md)
 
 听译是一款面向中文使用者的 Windows 本地会议字幕工具。它给固定版本的 [WhisperLiveKit](https://github.com/QuentinFuxa/WhisperLiveKit) 增加桌面操作层：系统声音和麦克风采集、中文设置、独立字幕窗、模型管理、词库及会议记录。流式识别、翻译、说话人分离与服务接口继续使用原库；上游固定在 0.2.26、commit `363e4f6d029694d9c81ae548beddd9d3c88a3637`。
 
