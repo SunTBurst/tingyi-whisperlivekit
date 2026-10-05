@@ -9,13 +9,13 @@ Set-ExecutionPolicy -Scope Process Bypass
 .\Setup.ps1
 ```
 
-脚本创建 `.venv`、安装桌面直接依赖及 WhisperLiveKit 声明的 CPU 运行依赖，并检查依赖一致性。它不会下载语音或翻译模型。首次启动软件：
+脚本创建 `.venv`、安装桌面直接依赖，并按 WhisperLiveKit 的 `cpu` extra 解析其依赖，再检查依赖一致性。它不会下载语音或翻译模型。`cpu` extra 表示所选依赖组；实际安装的 Torch wheel 仍受 uv 源配置、平台和解析结果影响，不能仅凭该 extra 保证安装为 CPU-only wheel。首次启动软件：
 
 ```powershell
 .\Start.ps1
 ```
 
-也可双击 `启动听译.vbs`。启动主窗口不要求已有 Whisper 权重，因此可以先查看设置和界面。开始识别前，在“工具 → 模型管理”中显式安装所需的 ASR 模型；模型体积较大，下载耗时与所需磁盘空间随模型而异。当前设置脚本安装 CPU 依赖，保证公开流程不依赖某个 CUDA 版本；GPU/CUDA 配置尚未作为干净环境安装路径验证，不能据此推断其兼容性。
+也可双击 `启动听译.vbs`。启动主窗口不要求已有 Whisper 权重，因此可以先查看设置和界面。开始识别前，在“工具 → 模型管理”中显式安装所需的 ASR 模型；模型体积较大，下载耗时与所需磁盘空间随模型而异。当前脚本面向 Windows，但全新环境安装尚未在另一台电脑完成冷启动验收；GPU/CUDA 用户需按本机驱动与硬件单独配置兼容的 Torch wheel。
 
 本地翻译使用 NLLB 权重。NLLB 模型许可为 CC-BY-NC-4.0，仅允许非商业使用并要求署名。阅读[模型卡](https://huggingface.co/facebook/nllb-200-distilled-600M)及许可后，才运行单独下载脚本：
 
@@ -29,7 +29,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 ## 边界
 
-- 当前安装入口仅承诺 Windows 与 CPU 依赖路径；macOS、Linux 和 CUDA/GPU 冷安装尚未由此脚本验证。
+- 安装脚本面向 Windows。依赖组合曾在现有环境中完成解析检查，但没有在另一台电脑做完整冷安装；macOS、Linux 和 GPU/CUDA 配置均未由此脚本验证。
 - WhisperLiveKit 上游源码会单独检出到 `upstream`，其许可为 Apache-2.0；本应用依赖的 PyQt6 使用 GPLv3 版本。发布许可和第三方许可见仓库根目录的许可证与声明文件。
 - 模型权重不包含在源码仓库中。下载前请核对各模型自己的来源、使用条件与许可。
 - 应用可在没有权重时打开，但识别、翻译等推理功能须先下载对应模型。

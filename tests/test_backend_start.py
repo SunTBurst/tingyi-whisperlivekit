@@ -2,6 +2,7 @@ import json
 import os
 import queue
 import subprocess
+import sys
 import threading
 import unittest
 from pathlib import Path
@@ -28,7 +29,7 @@ import numpy, scipy.signal, pyaudiowpatch
 print(json.dumps({'type':'status'}),flush=True)
 assert stopped.wait(10)
 '''
-        process=subprocess.Popen([str(ROOT/'.venv/Scripts/python.exe'),'-u','-c',probe],cwd=ROOT,
+        process=subprocess.Popen([sys.executable,'-u','-c',probe],cwd=ROOT,
             env=env,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,
             text=True,encoding='utf-8')
         events=queue.Queue()

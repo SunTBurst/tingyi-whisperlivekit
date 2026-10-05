@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from app.native_cli import _option_value, build_bench_arguments
 from app.settings import ROOT
@@ -26,11 +27,17 @@ def _config(**updates):
 class NativeCliBenchTests(unittest.TestCase):
     def test_explicit_model_with_separate_value_uses_matching_local_model_path(self):
         with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            local_model = root / "models" / "whisper-small"
+            local_model.mkdir(parents=True)
+            (local_model / "model.bin").write_bytes(b"fixture")
+            (local_model / "config.json").write_text("{}", encoding="utf-8")
             config_path = Path(directory) / "engine-options.json"
-            args = build_bench_arguments(["--model", "small"], _config(), config_file=config_path)
+            with patch("app.native_cli.ROOT", root):
+                args = build_bench_arguments(["--model", "small"], _config(), config_file=config_path)
             self.assertEqual(args[args.index("--model") + 1], "small")
             options = json.loads(config_path.read_text(encoding="utf-8"))
-            self.assertEqual(Path(options["model_dir"]), Path(r"C:\demo\tingyi\models\whisper-small"))
+            self.assertEqual(Path(options["model_dir"]), local_model)
             self.assertNotIn("model_path", options)
             self.assertEqual(options["min_chunk_size"], 0.5)
             for reserved in ("backend", "model_size", "lan", "api_token"):
@@ -38,12 +45,18 @@ class NativeCliBenchTests(unittest.TestCase):
 
     def test_explicit_model_with_equals_syntax_is_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            local_model = root / "models" / "whisper-small"
+            local_model.mkdir(parents=True)
+            (local_model / "model.bin").write_bytes(b"fixture")
+            (local_model / "config.json").write_text("{}", encoding="utf-8")
             config_path = Path(directory) / "options.json"
-            args = build_bench_arguments(["--model=small"], _config(), config_file=config_path)
+            with patch("app.native_cli.ROOT", root):
+                args = build_bench_arguments(["--model=small"], _config(), config_file=config_path)
             self.assertIn("--model=small", args)
             self.assertNotIn("--model", args)
             options = json.loads(config_path.read_text(encoding="utf-8"))
-            self.assertEqual(Path(options["model_dir"]), Path(r"C:\demo\tingyi\models\whisper-small"))
+            self.assertEqual(Path(options["model_dir"]), local_model)
 
     def test_language_aliases_and_equals_syntax_are_not_overridden(self):
         cases = [(["--languages", "fr"], "fr"), (["--lan", "zh"], "zh"), (["--languages=ar"], "ar"), (["--lan=ja"], "ja")]

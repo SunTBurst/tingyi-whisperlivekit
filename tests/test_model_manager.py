@@ -9,22 +9,41 @@ from app import model_manager, native_models
 
 class ModelManagerTests(unittest.TestCase):
     def test_catalog_and_local_install_state_include_existing_models(self):
-        names = {entry["name"] for entry in model_manager.catalog()}
-        self.assertIn("nllb-600m-int8", names)
-        self.assertIn("voxtral", names)
-        self.assertIn("qwen3-vllm:1.7b", names)
-        for size in ("tiny", "tiny.en", "base", "base.en", "small", "small.en", "medium", "medium.en",
-                     "large-v1", "large-v2", "large-v3", "large-v3-turbo"):
-            self.assertIn(f"whisper-{size}", names)
-            self.assertIn(f"native-whisper-{size}", names)
-        native_small = next(x for x in model_manager.installed_models() if x["name"] == "native-whisper-small")
-        self.assertTrue(native_small["installed"])
-        turbo = next(x for x in model_manager.catalog() if x["name"] == "whisper-large-v3-turbo")
-        self.assertEqual(turbo["repo"], "mobiuslabsgmbh/faster-whisper-large-v3-turbo")
-        installed = {entry["name"]: entry["installed"] for entry in model_manager.installed_models()}
-        self.assertTrue(installed["nllb-600m-int8"])
-        self.assertTrue(installed["whisper-small"])
-        self.assertTrue(installed["whisper-medium"])
+        with tempfile.TemporaryDirectory(prefix="models-fixture-") as directory:
+            root = Path(directory)
+            for relative in (
+                "native-whisper/small.pt",
+                "nllb-600m/model.bin",
+                "nllb-600m/config.json",
+                "nllb-600m/tokenizer.json",
+                "nllb-600m/shared_vocabulary.txt",
+                "whisper-small/model.bin",
+                "whisper-small/config.json",
+                "whisper-medium/model.bin",
+                "whisper-medium/config.json",
+            ):
+                placeholder = root / relative
+                placeholder.parent.mkdir(parents=True, exist_ok=True)
+                placeholder.write_text("test placeholder", encoding="utf-8")
+            with patch.object(model_manager, "MODEL_ROOT", root), \
+                 patch.object(model_manager, "_hub_repos", return_value={}), \
+                 patch("app.model_registry.REGISTRY_PATH", root / "model-registry.json"):
+                names = {entry["name"] for entry in model_manager.catalog()}
+                self.assertIn("nllb-600m-int8", names)
+                self.assertIn("voxtral", names)
+                self.assertIn("qwen3-vllm:1.7b", names)
+                for size in ("tiny", "tiny.en", "base", "base.en", "small", "small.en", "medium", "medium.en",
+                             "large-v1", "large-v2", "large-v3", "large-v3-turbo"):
+                    self.assertIn(f"whisper-{size}", names)
+                    self.assertIn(f"native-whisper-{size}", names)
+                native_small = next(x for x in model_manager.installed_models() if x["name"] == "native-whisper-small")
+                self.assertTrue(native_small["installed"])
+                turbo = next(x for x in model_manager.catalog() if x["name"] == "whisper-large-v3-turbo")
+                self.assertEqual(turbo["repo"], "mobiuslabsgmbh/faster-whisper-large-v3-turbo")
+                installed = {entry["name"]: entry["installed"] for entry in model_manager.installed_models()}
+                self.assertTrue(installed["nllb-600m-int8"])
+                self.assertTrue(installed["whisper-small"])
+                self.assertTrue(installed["whisper-medium"])
 
     def test_unknown_download_name_is_rejected_before_network_access(self):
         with self.assertRaisesRegex(ValueError, "Unknown model"):

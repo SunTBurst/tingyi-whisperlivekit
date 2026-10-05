@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
+import sys
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -122,8 +123,20 @@ class ToolsUiTests(unittest.TestCase):
         self.assertTrue(_cli_uses_speaker_runtime("diagnose", ["--diarization"], {}))
         self.assertFalse(_cli_uses_speaker_runtime("pull", ["sortformer-4spk-v2"], settings))
         self.assertFalse(_cli_uses_speaker_runtime("bench", ["--config={\"diarization\":true,\"diarization_backend\":\"diart\"}"], {}))
-        self.assertEqual(Path(_python()), ROOT / ".venv" / "Scripts" / "python.exe")
-        self.assertEqual(_python(speaker_runtime=True), str(ROOT / "runtime" / "speaker" / "Scripts" / "python.exe"))
+        with tempfile.TemporaryDirectory(prefix="tool-runtime-fixture-") as directory:
+            root = Path(directory)
+            app_python = root / ".venv" / "Scripts" / "python.exe"
+            speaker_python = root / "runtime" / "speaker" / "Scripts" / "python.exe"
+            for executable in (app_python, speaker_python):
+                executable.parent.mkdir(parents=True, exist_ok=True)
+                executable.write_text("executable placeholder", encoding="utf-8")
+            with patch("app.tools_ui.ROOT", root):
+                self.assertEqual(Path(_python()), app_python)
+                self.assertEqual(_python(speaker_runtime=True), str(speaker_python))
+
+        with tempfile.TemporaryDirectory(prefix="tool-runtime-missing-") as directory:
+            with patch("app.tools_ui.ROOT", Path(directory)):
+                self.assertEqual(_python(), sys.executable)
 
     def test_cli_config_and_explicit_backend_control_speaker_runtime_choice(self):
         self.assertTrue(_cli_uses_speaker_runtime(

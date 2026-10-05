@@ -1,4 +1,7 @@
 from dataclasses import fields
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 import pytest
 
@@ -21,9 +24,15 @@ def test_advanced_parameters_reach_native_dataclass_without_filtering():
 
 
 def test_existing_local_model_is_resolved_but_custom_path_survives():
-    values = config_values(DEFAULTS)
-    assert values['model_dir'].endswith('whisper-medium')
-    assert config_values({**DEFAULTS, 'wlk': {'model_dir': 'X:/custom'}})['model_dir'] == 'X:/custom'
+    with TemporaryDirectory(prefix='wlk-model-fixture-') as directory:
+        root = Path(directory)
+        model = root / 'models' / 'whisper-medium'
+        model.mkdir(parents=True)
+        (model / 'model.bin').write_bytes(b'fixture')
+        with patch('app.wlk_config.ROOT', root):
+            values = config_values(DEFAULTS)
+            assert values['model_dir'] == str(model)
+            assert config_values({**DEFAULTS, 'wlk': {'model_dir': 'X:/custom'}})['model_dir'] == 'X:/custom'
 
 
 def test_unknown_settings_fail_loudly_instead_of_silently_discarding():
