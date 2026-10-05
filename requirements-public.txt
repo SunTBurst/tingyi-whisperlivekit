@@ -1,0 +1,12 @@
+# Direct dependencies used by the Windows desktop shell. WhisperLiveKit's
+# declared runtime dependencies are installed separately by Setup.ps1.
+ctranslate2==4.8.2
+imageio-ffmpeg==0.6.0
+nllw==0.1.6
+numpy==2.2.6
+openpyxl==3.1.5
+PyAudioWPatch==0.2.12.8
+PyQt6==6.11.0
+psutil==7.2.2
+requests==2.34.2
+scipy==1.18.1

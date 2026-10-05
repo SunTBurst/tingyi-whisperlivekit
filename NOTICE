@@ -1,0 +1,12 @@
+听译 (Tingyi)
+Copyright (C) 2026 SunTBurst and contributors.
+
+The original desktop application source is licensed under GPL-3.0-or-later.
+Third-party components retain their original copyright and licensing terms.
+
+Based on WhisperLiveKit 0.2.26 by Quentin Fuxa and contributors,
+Apache License 2.0, fixed commit 363e4f6d029694d9c81ae548beddd9d3c88a3637.
+WhisperLiveKit is fetched separately; its source files are not overwritten.
+
+See LICENSE and THIRD_PARTY_NOTICES.md. Model weights, binaries, and user data
+are not included in this source repository.

@@ -1,0 +1,20 @@
+# Runtime, models and every user's private materials
+.venv/
+runtime/
+models/
+logs/
+records/
+data/
+upstream/
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.idea/
+.vscode/
+Thumbs.db
